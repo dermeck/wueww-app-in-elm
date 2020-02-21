@@ -49,6 +49,16 @@ descriptionDecoder =
         (D.maybe (D.field "short" D.string))
 
 
+description : Description -> String
+description d =
+    case d.short of
+        Just value ->
+            value
+
+        Nothing ->
+            d.long
+
+
 sessionsFileDecoder : D.Decoder (List Session)
 sessionsFileDecoder =
     let
@@ -102,12 +112,7 @@ view model =
                                         List.member session.id model.expandedSessionIds
 
                                     descriptionText =
-                                        case session.description.short of
-                                            Just value ->
-                                                value
-
-                                            Nothing ->
-                                                session.description.long
+                                        description session.description
 
                                     chevronDirection =
                                         if isExpanded then
