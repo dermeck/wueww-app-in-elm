@@ -49,14 +49,53 @@ descriptionDecoder =
         (D.maybe (D.field "short" D.string))
 
 
-description : Description -> String
-description d =
+descriptionText : Description -> String
+descriptionText d =
     case d.short of
         Just value ->
             value
 
         Nothing ->
             d.long
+
+
+sessionCard : Bool -> Session -> Html Msg
+sessionCard isExpanded session =
+    let
+        chevronDirection =
+            if isExpanded then
+                "down"
+
+            else
+                "right"
+    in
+    div
+        [ A.class "ui card" ]
+        [ div [ A.class "content" ]
+            [ div
+                [ A.class "header"
+                , E.onClick
+                    (if isExpanded then
+                        CollapseSession session.id
+
+                     else
+                        ExpandSession session.id
+                    )
+                ]
+                [ span [ A.class "right floated" ] [ i [ A.class "chevron icon", A.class chevronDirection ] [] ]
+                , text session.title
+                ]
+            ]
+        , if isExpanded then
+            div [ A.class "extra content" ]
+                [ div [ A.class "description" ]
+                    [ text (descriptionText session.description)
+                    ]
+                ]
+
+          else
+            text ""
+        ]
 
 
 sessionsFileDecoder : D.Decoder (List Session)
@@ -110,43 +149,8 @@ view model =
                                 let
                                     isExpanded =
                                         List.member session.id model.expandedSessionIds
-
-                                    descriptionText =
-                                        description session.description
-
-                                    chevronDirection =
-                                        if isExpanded then
-                                            "down"
-
-                                        else
-                                            "right"
                                 in
-                                div [ A.class "ui card" ]
-                                    [ div [ A.class "content" ]
-                                        [ div
-                                            [ A.class "header"
-                                            , E.onClick
-                                                (if isExpanded then
-                                                    CollapseSession session.id
-
-                                                 else
-                                                    ExpandSession session.id
-                                                )
-                                            ]
-                                            [ span [ A.class "right floated" ] [ i [ A.class "chevron icon", A.class chevronDirection ] [] ]
-                                            , text session.title
-                                            ]
-                                        ]
-                                    , if isExpanded then
-                                        div [ A.class "extra content" ]
-                                            [ div [ A.class "description" ]
-                                                [ text descriptionText
-                                                ]
-                                            ]
-
-                                      else
-                                        text ""
-                                    ]
+                                sessionCard isExpanded session
                             )
                             sessions
                         )
